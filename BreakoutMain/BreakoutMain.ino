@@ -13,6 +13,9 @@
  */
 
 #include <Arduboy2.h>
+#include "Adafruit_MPU6050.h"
+#include "Adafruit_Sensor.h"
+#include "Wire.h"
 
 // block in EEPROM to save high scores
 #define EE_FILE 2
@@ -22,6 +25,7 @@
 
 Arduboy2 arduboy;
 BeepPin1 beep;
+Adafruit_MPU6050 acceler; // accelerometer object
 
 constexpr uint8_t frameRate = 40; // Frame rate in frames per second
 
@@ -81,6 +85,11 @@ void setup()
   beep.begin();
   arduboy.setFrameRate(frameRate);
   arduboy.initRandomSeed();
+  // accelerometer setup
+  acceler.begin();
+  acceler.setAccelerometerRange(MPU6050_RANGE_8_G);
+  acceler.setGyroRange(MPU6050_RANGE_250_DEG);
+  acceler.setFilterBandwidth(MPU6050_BAND_21_HZ);
 }
 
 void loop()
@@ -158,11 +167,20 @@ void loop()
 
 void movePaddle()
 {
+  // variables for reading accelerometer
+  sensors_event_t a, g, temp;
+  acceler.getEvent(&a, &g, &temp);
+  float accelY = a.acceleration.y;
+  float yConst = 0; // used to compare the current acceleration value to 
+  float minTilt = 1.5; // this is the minimum value the board must be tilted to move the 
   //Move right
   if(xPaddle < WIDTH - 12)
   {
     if (arduboy.pressed(RIGHT_BUTTON))
     {
+      xPaddle+=2;
+    }
+    else if ((accelY-yConst) > minTilt) { // the board is tilted right
       xPaddle+=2;
     }
   }
@@ -172,6 +190,9 @@ void movePaddle()
   {
     if (arduboy.pressed(LEFT_BUTTON))
     {
+      xPaddle-=2;
+    }
+    else if ((accelY-yConst) < -minTilt) { // the board is tilted left
       xPaddle-=2;
     }
   }
