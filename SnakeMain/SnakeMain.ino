@@ -248,29 +248,29 @@ void loop() {
     float accelY = a.acceleration.y;
     float xConst = 0; // used to compare the current acceleration value to 
     float yConst = 0;
-    float minTilt = 1.75; // this is the minimum value the board must be tilted to move the snake
+    float minTilt = 1.5; // this is the minimum value the board must be tilted to move the snake
     // implementing movement decision
-    if (((accelY-yConst) > minTilt) && (abs(accelX-xConst) < minTilt)) { // tilted right
-      if(p1.dir != 'L') {
-        p1.dir = 'R';
-      }
-    }
-    if (((accelX-xConst) > minTilt) && (abs(accelY-yConst) < minTilt)) { // tilted down
-      if(p1.dir != 'U') {
-        p1.dir = 'D';
-      }
-    }
-    if (((accelY-yConst) < -minTilt) && (abs(accelX-xConst) < minTilt)) { // tilt left
-      if (p1.dir != 'R') {
+    if (((accelY-yConst) > minTilt) && (abs(accelX-xConst) < minTilt)) { // tilted left
+      if(p1.dir != 'R') {
         p1.dir = 'L';
       }
     }
-    if (((accelX-xConst) < -minTilt) && (abs(accelY-yConst) < minTilt)) { // tilt up
-      if (p1.dir != 'D') {
+    if (((accelX-xConst) > minTilt) && (abs(accelY-yConst) < minTilt)) { // tilted up
+      if(p1.dir != 'D') {
         p1.dir = 'U';
       }
     }
-    if ((accelX>-minTilt) && (accelX<minTilt) && (accelY>-minTilt) && (accelY<minTilt)) { // continuing in same direction if board is not tilted
+    if (((accelY-yConst) < -minTilt) && (abs(accelX-xConst) < minTilt)) { // tilt right
+      if (p1.dir != 'L') {
+        p1.dir = 'R';
+      }
+    }
+    if (((accelX-xConst) < -minTilt) && (abs(accelY-yConst) < minTilt)) { // tilt down
+      if (p1.dir != 'U') {
+        p1.dir = 'D';
+      }
+    }
+    /*if ((accelX>-minTilt) && (accelX<minTilt) && (accelY>-minTilt) && (accelY<minTilt)) { // continuing in same direction if board is not tilted
       if (p1.dir == 'L') {
         p1.dir = 'L';
       }
@@ -283,7 +283,7 @@ void loop() {
       if (p1.dir == 'D') {
         p1.dir = 'D';
       }
-    }
+    }*/
     
     switch(p1.dir)
     {
