@@ -1,4 +1,7 @@
 #include "Arduboy.h"
+#include "Adafruit_MPU6050.h"
+#include "Wire.h"
+#include "Adafruit_Sensor.h"
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
@@ -9,6 +12,9 @@ byte maxY = 63;
 byte minY = 10;
 char gameState = 'T';
 bool sound = false;
+
+// Accelerometer object
+Adafruit_MPU6050 acceler;
 
 struct coords
 {
@@ -175,7 +181,17 @@ void DrawFrame()
 void setup() {
   // initiate arduboy instance
   arduboy.begin();
-
+  /*Serial.begin(9600);
+  while(!Serial) {
+    
+  }
+  Serial.println("begin");*/
+  Wire.setWireTimeout(3000,true);
+  // initializing the acccelerometer
+  acceler.begin();
+  //Serial.println("check");
+  acceler.setGyroRange(MPU6050_RANGE_250_DEG);
+  acceler.setFilterBandwidth(MPU6050_BAND_21_HZ);
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
   arduboy.setFrameRate(30);
@@ -224,7 +240,51 @@ void loop() {
         p1.dir = 'D'; 
       } 
     }
-  
+
+    // Adding Accelerometer movement code
+    sensors_event_t a, g, temp;
+    acceler.getEvent(&a, &g, &temp);
+    float accelX = a.acceleration.x;
+    float accelY = a.acceleration.y;
+    float xConst = 0; // used to compare the current acceleration value to 
+    float yConst = 0;
+    float minTilt = 1.5; // this is the minimum value the board must be tilted to move the snake
+    // implementing movement decision
+    if (((accelY-yConst) > minTilt) && (abs(accelX-xConst) < minTilt)) { // tilted left
+      if(p1.dir != 'R') {
+        p1.dir = 'L';
+      }
+    }
+    if (((accelX-xConst) > minTilt) && (abs(accelY-yConst) < minTilt)) { // tilted up
+      if(p1.dir != 'D') {
+        p1.dir = 'U';
+      }
+    }
+    if (((accelY-yConst) < -minTilt) && (abs(accelX-xConst) < minTilt)) { // tilt right
+      if (p1.dir != 'L') {
+        p1.dir = 'R';
+      }
+    }
+    if (((accelX-xConst) < -minTilt) && (abs(accelY-yConst) < minTilt)) { // tilt down
+      if (p1.dir != 'U') {
+        p1.dir = 'D';
+      }
+    }
+    /*if ((accelX>-minTilt) && (accelX<minTilt) && (accelY>-minTilt) && (accelY<minTilt)) { // continuing in same direction if board is not tilted
+      if (p1.dir == 'L') {
+        p1.dir = 'L';
+      }
+      if (p1.dir == 'R') {
+        p1.dir = 'R';
+      }
+      if (p1.dir == 'U') {
+        p1.dir = 'U';
+      }
+      if (p1.dir == 'D') {
+        p1.dir = 'D';
+      }
+    }*/
+    
     switch(p1.dir)
     {
       case 'U':
